@@ -1,0 +1,14 @@
+# Oneshot unit: runs a single sync then exits. Triggered by slack-sheet-sync.timer.
+# __APP_DIR__ and __USER__ are filled in by deploy/setup.sh; do not install this
+# template directly.
+[Unit]
+Description=Slack -> Google Sheet member sync (one-shot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=__USER__
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=__APP_DIR__/.env
+ExecStart=__APP_DIR__/.venv/bin/python -m slack_sheet_sync --once

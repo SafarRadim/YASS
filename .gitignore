@@ -1,0 +1,10 @@
+.env
+service-account.json
+*.json
+!pyproject.toml
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ruff_cache/
+.pytest_cache/

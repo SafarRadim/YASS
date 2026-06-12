@@ -1,0 +1,12 @@
+[Unit]
+Description=Run slack-sheet-sync daily at midnight
+
+[Timer]
+# Fire every day at 00:00 in the machine's local timezone.
+OnCalendar=*-*-* 00:00:00
+# If the machine was off at midnight, run once as soon as it's back up.
+Persistent=true
+Unit=slack-sheet-sync.service
+
+[Install]
+WantedBy=timers.target
