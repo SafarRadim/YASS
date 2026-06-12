@@ -1,13 +1,24 @@
-# slack-sheet-sync
+# YASS — Yet Another Slack Syncer
 
-Polls a Slack workspace on an interval and reconciles members into a Google Sheet.
+A small, self-hostable service that keeps an external destination in sync with a Slack
+workspace's membership and profile data. It polls Slack on a schedule and reconciles the
+differences — no public URL, webhook, or Socket Mode to manage.
+
+The current sync target is **Google Sheets**: members become rows, and selected profile
+fields are kept up to date. The reconcile core is destination-agnostic, so other targets
+(a database, a CSV, an HTTP endpoint) can be added behind the same poll-and-diff loop.
+
+**Google Sheets sync at a glance:**
 
 - **New member joins Slack** → a new row is appended.
 - **Email / phone / section change** → the matching cells are updated.
 
 Detection is poll-only (one job does everything by diffing `users.list` against the
-sheet), so there is **no public URL, webhook, or Socket Mode** to manage. Rows are keyed
-by Slack user id. Users removed from Slack are left in the sheet untouched.
+destination), so there is nothing inbound to expose. Rows are keyed by Slack user id, and
+members removed from Slack are left in place (never auto-deleted).
+
+> The Python package is named `slack_sheet_sync` — that's the module you invoke and the
+> systemd unit you install. "YASS" is the project name.
 
 ## Sheet layout
 
