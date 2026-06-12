@@ -12,15 +12,16 @@ RUN_USER="${SUDO_USER:-$USER}"
 echo "App dir: $APP_DIR"
 echo "Run as:  $RUN_USER"
 
-# 1. Secure secrets (no-op if a file is absent).
-for f in .env service-account.json; do
+# 1. Secure whichever secret files are present (which exist depends on the auth mode).
+for f in .env service-account.json oauth-client.json oauth-token.json; do
     if [ -f "$APP_DIR/$f" ]; then
         chmod 600 "$APP_DIR/$f"
         echo "secured $f (600)"
-    else
-        echo "WARNING: $APP_DIR/$f not found — create it before the first run"
     fi
 done
+if [ ! -f "$APP_DIR/.env" ]; then
+    echo "WARNING: $APP_DIR/.env not found — create it (cp .env.example .env) before the first run"
+fi
 
 # 2. Build the virtualenv from the lockfile if it isn't there yet.
 if [ ! -x "$APP_DIR/.venv/bin/python" ]; then

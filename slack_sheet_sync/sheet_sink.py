@@ -9,15 +9,17 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 import gspread
-from google.oauth2.service_account import Credentials
 
+from .google_auth import build_client
 from .slack_source import Member
 
-log = logging.getLogger("slack_sheet_sync")
+if TYPE_CHECKING:
+    from .config import Config
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+log = logging.getLogger("slack_sheet_sync")
 
 # Column order in the sheet. slack_id is the stable key and must stay first.
 HEADER = ["slack_id", "name", "email", "phone", "section", "updated_at"]
@@ -26,16 +28,13 @@ _FIELDS = ("name", "email", "phone", "section")
 HEADER_LAST_COL = chr(ord("A") + len(HEADER) - 1)
 
 
-def open_worksheet(
-    credentials_file: str, spreadsheet_id: str, worksheet_name: str
-) -> gspread.Worksheet:
-    creds = Credentials.from_service_account_file(credentials_file, scopes=SCOPES)
-    client = gspread.authorize(creds)
-    spreadsheet = client.open_by_key(spreadsheet_id)
+def open_worksheet(config: Config) -> gspread.Worksheet:
+    client = build_client(config)
+    spreadsheet = client.open_by_key(config.spreadsheet_id)
     try:
-        worksheet = spreadsheet.worksheet(worksheet_name)
+        worksheet = spreadsheet.worksheet(config.worksheet_name)
     except gspread.WorksheetNotFound:
-        worksheet = spreadsheet.add_worksheet(worksheet_name, rows=100, cols=len(HEADER))
+        worksheet = spreadsheet.add_worksheet(config.worksheet_name, rows=100, cols=len(HEADER))
 
     _ensure_header(worksheet)
     return worksheet

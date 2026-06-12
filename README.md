@@ -50,10 +50,39 @@ bot these scopes:
 
 Copy the **Bot User OAuth Token** (`xoxb-…`).
 
-### 2. Google service account
+### 2. Google access
+
+Pick one auth mode and set `GOOGLE_AUTH_MODE` in `.env` accordingly.
+
+**Mode A — service account (default, `GOOGLE_AUTH_MODE=service_account`)**
 1. In Google Cloud, create a service account and download its JSON key.
 2. Enable the **Google Sheets API** for the project.
 3. Share the target spreadsheet with the service account's email (Editor access).
+
+Simplest, but the service account is an *external* identity — if your org forbids
+external sharing, this share is blocked. In that case use Mode B.
+
+**Mode B — user OAuth (`GOOGLE_AUTH_MODE=oauth`)**
+
+The app acts as a real user who already has access to the sheet (e.g. via a Google Group
+or shared folder), so it inherits that access and sidesteps external-sharing limits — no
+workspace-admin cooperation needed.
+
+1. In a Google Cloud project you own, enable the **Google Sheets API** and create an
+   **OAuth client ID** of type *Desktop app*; download its client-secrets JSON.
+2. Point `GOOGLE_OAUTH_CLIENT_FILE` and `GOOGLE_OAUTH_TOKEN_FILE` at that file and a
+   token path in `.env`.
+3. On a machine **with a browser**, signed in as a user who can edit the sheet, run the
+   one-time consent:
+   ```bash
+   GOOGLE_AUTH_MODE=oauth uv run python -m slack_sheet_sync.google_oauth_setup
+   ```
+   This writes the authorized-user token to `GOOGLE_OAUTH_TOKEN_FILE`.
+4. Copy that token file to the server (chmod 600). The service refreshes it automatically
+   from then on.
+
+> Caveat: some orgs also restrict third-party OAuth apps. If consent is denied for an
+> unverified app, there's no path without admin help.
 
 ### 3. Configure
 ```bash

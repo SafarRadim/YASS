@@ -27,9 +27,7 @@ log = logging.getLogger("slack_sheet_sync")
 
 def run_once(config: Config, dry_run: bool = False) -> None:
     client = WebClient(token=config.slack_bot_token)
-    worksheet = open_worksheet(
-        config.google_credentials_file, config.spreadsheet_id, config.worksheet_name
-    )
+    worksheet = open_worksheet(config)
     members = fetch_members(client, config.section_field_id)
     stats = sync_members(worksheet, members, dry_run=dry_run)
     log.info(
